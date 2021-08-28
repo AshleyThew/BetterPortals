@@ -18,10 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Singleton
@@ -34,7 +31,7 @@ public class EntityTrackingManager implements IEntityTrackingManager, Listener {
     /**
      * Bukkit doesn't allow us to get the hand used from {@link PlayerAnimationEvent}, so we get it from {@link PlayerInteractEvent} then store it for later.
      */
-    private final Map<Entity, EquipmentSlot> lastHandUsed = new HashMap<>();
+    private final Map<UUID, EquipmentSlot> lastHandUsed = new HashMap<>();
 
     @Inject
     public EntityTrackingManager(Logger logger, IEventRegistrar eventRegistrar, IEntityTracker.Factory entityTrackerFactory) {
@@ -111,7 +108,7 @@ public class EntityTrackingManager implements IEntityTrackingManager, Listener {
     public void onPlayerAnimation(PlayerAnimationEvent event) {
         if(event.getAnimationType() != PlayerAnimationType.ARM_SWING) {return;}
 
-        EquipmentSlot hand = lastHandUsed.get(event.getPlayer());
+        EquipmentSlot hand = lastHandUsed.get(event.getPlayer().getUniqueId());
         if(hand == null) {return;}
 
         AnimationType type = hand == EquipmentSlot.HAND ? AnimationType.MAIN_HAND : AnimationType.OFF_HAND;
@@ -143,7 +140,7 @@ public class EntityTrackingManager implements IEntityTrackingManager, Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         EquipmentSlot hand = event.getHand();
         if(hand != null) {
-            lastHandUsed.put(event.getPlayer(), hand);
+            lastHandUsed.put(event.getPlayer().getUniqueId(), hand);
         }
     }
 
