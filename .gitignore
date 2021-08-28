@@ -13,3 +13,4 @@ dependency-reduced-pom.xml
 !gradlew
 !gradlew.bat
 !gradle/
+.idea/
