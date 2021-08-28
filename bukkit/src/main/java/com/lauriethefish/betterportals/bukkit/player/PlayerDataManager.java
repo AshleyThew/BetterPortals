@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -142,12 +143,21 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
     }
 
     @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent event) {
-        logger.fine("Saving selection on leave");
-        loggedOutPlayerSelections.put(event.getPlayer().getUniqueId(), players.get(event.getPlayer()).getSelection());
+    public void onPlayerLeave(PlayerKickEvent event) {
+        handleLeave(event.getPlayer());
+    }
 
-        logger.fine("Unregistering player data on leave for player: %s", event.getPlayer().getUniqueId());
-        if(players.remove(event.getPlayer()) == null) { // Remove the registered data, printing a warning if there wasn't one
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent event) {
+        handleLeave(event.getPlayer());
+    }
+
+    protected void handleLeave(Player player){
+        logger.fine("Saving selection on leave");
+        loggedOutPlayerSelections.put(player.getUniqueId(), players.get(player).getSelection());
+
+        logger.fine("Unregistering player data on leave for player: %s", player.getUniqueId());
+        if(players.remove(player) == null) { // Remove the registered data, printing a warning if there wasn't one
             logger.warning("Player left who had unregistered player data. This shouldn't happen");
         }
     }
