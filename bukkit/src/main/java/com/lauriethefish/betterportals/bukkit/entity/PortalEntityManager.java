@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.PortalPosition;
 import com.lauriethefish.betterportals.bukkit.config.MiscConfig;
 import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
+import com.lauriethefish.betterportals.bukkit.events.EntityPortalTeleportEvent;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import com.lauriethefish.betterportals.bukkit.net.IPortalClient;
@@ -15,6 +16,7 @@ import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.RequestException;
 import com.lauriethefish.betterportals.shared.net.requests.TeleportRequest;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -205,6 +207,16 @@ public class PortalEntityManager implements IPortalEntityManager {
         // Teleporting an entity removes the velocity, so we have to re-add it
         Vector velocity = entity.getVelocity();
         velocity = transformations.rotateToDestination(velocity);
+
+        EntityPortalTeleportEvent portalTeleportEvent = new EntityPortalTeleportEvent(entity, destPos, velocity);
+        Bukkit.getPluginManager().callEvent(portalTeleportEvent);
+
+        if (portalTeleportEvent.isCancelled()) {
+            return;
+        }
+
+        destPos = portalTeleportEvent.getDestination();
+        velocity = portalTeleportEvent.getVelocity();
 
         logger.fine("Teleporting entity with ID %d and of type %s to position %s", entity.getEntityId(), entity.getType(), destPos.toVector());
 
